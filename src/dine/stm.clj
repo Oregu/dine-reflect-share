@@ -29,7 +29,7 @@
 
           :reflexing
           (let [time-to-think (+ (rand 100) 100)]
-            (println myname "starts thinking")
+            (println myname "reflexing")
             (Thread/sleep time-to-think)
             (recur :hungry))
 
@@ -55,22 +55,22 @@
             (println myname "eating with forks" left-fork-idx right-fork-idx)
             (Thread/sleep time-to-eat)
             (println myname "full")
-
+            ; Return forks
             (dosync
               (ref-set left-fork free-fork)
               (ref-set right-fork free-fork))
-
+            ; Gather stats
             (swap! eat-wait-counts conj @current-wait-count)
             (swap! eat-wait-times conj (- (millis) @time-last-eat))
             (swap! current-wait-count (constantly 0))
             (swap! time-last-eat millis)
-
+            ; Reflex more or basta
             (if (< (- (millis) time-start) run-time)
               (recur :reflexing)
               (do
                 (println myname "done!")
                 {:myname myname
-                 :thinking @eat-wait-times
+                 :reflexing @eat-wait-times
                  :attempts @eat-wait-counts}))))))))
 
 ; Reporting
@@ -81,10 +81,10 @@
       "avg" (quot (apply + ~stats) (count ~stats))))
 
 (defn report [data]
-  (let [{myname :myname,
-         time-thinking :thinking,
-         dine-attempts :attempts} data]
-    (stats myname "Thinking time" time-thinking)
+  (let [{myname         :myname,
+         time-reflexing :reflexing,
+         dine-attempts  :attempts} data]
+    (stats myname "Reflexing time" time-reflexing)
     (stats myname "Dine attempts" dine-attempts)))
 
 ; Fire up
