@@ -1,32 +1,24 @@
 (ns dine.stm)
 
+; Constants
+(def run-time 10000)
 (def free-fork -1)
+
+; Utils
 (defn free? [fork] (= fork free-fork))
 
 (defn millis
   ([ ] (System/currentTimeMillis))
   ([x] (System/currentTimeMillis)))
 
-(defmacro stats [myname desc stats]
-  `(println ~desc "for" ~myname "is"
-      "min" (apply min ~stats)
-      "max" (apply max ~stats)
-      "avg" (quot (apply + ~stats) (count ~stats))))
-
-(defn report [data]
-  (let [{myname :myname,
-         time-thinking :thinking,
-         dine-attempts :attempts} data]
-    (stats myname "Thinking time" time-thinking)
-    (stats myname "Dine attempts" dine-attempts)))
-
+; Philosopher dining
 (defn dine [idx myname forks total]
   (future
     (let [time-start (millis)
-          time-last-eat   (atom time-start)
-          eat-wait-times  (atom [])
+          time-last-eat      (atom time-start)
+          eat-wait-times     (atom [])
           current-wait-count (atom 0)
-          eat-wait-counts (atom [])
+          eat-wait-counts    (atom [])
           left-fork-idx  idx
           right-fork-idx (mod (inc idx) total)
           left-fork  (nth forks left-fork-idx)
@@ -73,7 +65,7 @@
             (swap! current-wait-count (constantly 0))
             (swap! time-last-eat millis)
 
-            (if (< (- (millis) time-start) 10000)
+            (if (< (- (millis) time-start) run-time)
               (recur :reflexing)
               (do
                 (println myname "done!")
@@ -81,6 +73,21 @@
                  :thinking @eat-wait-times
                  :attempts @eat-wait-counts}))))))))
 
+; Reporting
+(defmacro stats [myname desc stats]
+  `(println ~desc "for" ~myname "is"
+      "min" (apply min ~stats)
+      "max" (apply max ~stats)
+      "avg" (quot (apply + ~stats) (count ~stats))))
+
+(defn report [data]
+  (let [{myname :myname,
+         time-thinking :thinking,
+         dine-attempts :attempts} data]
+    (stats myname "Thinking time" time-thinking)
+    (stats myname "Dine attempts" dine-attempts)))
+
+; Fire up
 (defn go []
   (let [folks [:Aristotle :Kant :Spinoza :Marx :Russel]
         n (count folks)
