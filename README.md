@@ -2,5 +2,5 @@ Dining philosophers.
 ================================
 A small concurrent/distributed playground.
 
-[x] STM.
-[ ] Twitter Finagle.
+- [x] STM.
+- [ ] Twitter Finagle.
