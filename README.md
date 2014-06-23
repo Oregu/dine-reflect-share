@@ -3,4 +3,5 @@ Dining philosophers.
 A small concurrent/distributed playground.
 
 - [x] STM.
-- [ ] Twitter Finagle.
+- [ ] Chandy/Misra.
+- [ ] Distributed (Netty, Finagle, don't know yet).

@@ -6,10 +6,7 @@
 
 ; Utils
 (defn free? [fork] (= fork free-fork))
-
-(defn millis
-  ([ ] (System/currentTimeMillis))
-  ([x] (System/currentTimeMillis)))
+(defn millis [& args] (System/currentTimeMillis))
 
 ; Philosopher dining
 (defn dine [idx myname forks total]
