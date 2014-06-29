@@ -6,8 +6,8 @@
 (defn table-handler [ch client-info]
   (receive-all ch
     #(do
-      (println "got msg" %1)
-      (enqueue ch (str "You said " %1)))))
+      (println "got msg" %)
+      (enqueue ch "You can dine now"))))
 
 (defn dine [myname]
   (let [ch (wait-for-result
@@ -16,7 +16,9 @@
                           :frame (string :utf-8 :delimiters ["\r\n"])}))]
 
     (enqueue ch (str "Hello from " myname))
-    (wait-for-message ch)))
+    (let [msg (read-channel ch)]
+      (println "server answered:" msg)
+      (close ch))))
 
 (defn go []
   (let [folks [:Aristotle :Kant :Spinoza :Marx :Russel]]
@@ -24,8 +26,9 @@
                    {:name "Noodles",
                     :port 1984,
                     :frame (string :utf-8 :delimiters ["\r\n"])})]
-      (doall (map dine folks))
 
+      (doall (map dine folks))
       (Thread/sleep 5000)
-      (server)
+
+      (server) ; closing server
       :done)))
