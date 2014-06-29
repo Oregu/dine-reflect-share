@@ -5,20 +5,27 @@
 
 (defn table-handler [ch client-info]
   (receive-all ch
-    #(enqueue ch (str "You said " %))))
-
-(def ch
-  (wait-for-result
-    (tcp-client {:host "localhost",
-                 :port 1984,
-                 :frame (string :utf-8 :delimiters ["\r\n"])})))
+    #(do
+      (println "got msg" %1)
+      (enqueue ch (str "You said " %1)))))
 
 (defn dine [myname]
-  (do
-    (enqueue ch "Hello, server!")
+  (let [ch (wait-for-result
+             (tcp-client {:host "localhost",
+                          :port 1984,
+                          :frame (string :utf-8 :delimiters ["\r\n"])}))]
+
+    (enqueue ch (str "Hello from " myname))
     (wait-for-message ch)))
 
 (defn go []
   (let [folks [:Aristotle :Kant :Spinoza :Marx :Russel]]
-    (start-tcp-server table-handler {:port 1984, :frame (string :utf-8 :delimiters ["\r\n"])})
-    (map dine folks)))
+    (let [server (start-tcp-server table-handler
+                   {:name "Noodles",
+                    :port 1984,
+                    :frame (string :utf-8 :delimiters ["\r\n"])})]
+      (doall (map dine folks))
+
+      (Thread/sleep 5000)
+      (server)
+      :done)))
