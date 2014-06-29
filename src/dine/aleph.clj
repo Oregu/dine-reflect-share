@@ -6,8 +6,8 @@
 (defn table-handler [ch client-info]
   (receive-all ch
     #(do
-      (println "got msg" %)
-      (enqueue ch "You can dine now"))))
+      (println "server got msg:" %)
+      (enqueue ch "You can dine now!"))))
 
 (defn dine [myname]
   (let [ch (wait-for-result
@@ -16,7 +16,7 @@
                           :frame (string :utf-8 :delimiters ["\r\n"])}))]
 
     (enqueue ch (str "Hello from " myname))
-    (let [msg (read-channel ch)]
+    (let [msg @(read-channel ch)]
       (println "server answered:" msg)
       (close ch))))
 
